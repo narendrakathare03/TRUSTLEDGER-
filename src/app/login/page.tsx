@@ -1,0 +1,2 @@
+import Link from 'next/link';import AuthForm from '@/components/AuthForm';
+export default function Login(){return <main className="auth-shell"><Link className="brand" href="/"><span className="brand-mark">T</span> TrustLedger</Link><section className="auth-card"><div className="eyebrow">WELCOME BACK</div><h1>Sign in</h1><p className="muted">Continue to your trusted memory workspace.</p><AuthForm mode="login"/><p className="auth-switch">New to TrustLedger? <Link href="/register">Create an account</Link></p></section></main>}

@@ -1,0 +1,2 @@
+import Link from 'next/link';import AuthForm from '@/components/AuthForm';
+export default function Register(){return <main className="auth-shell"><Link className="brand" href="/"><span className="brand-mark">T</span> TrustLedger</Link><section className="auth-card"><div className="eyebrow">START YOUR WORKSPACE</div><h1>Create account</h1><p className="muted">Your first personal agent is created automatically.</p><AuthForm mode="register"/><p className="auth-switch">Already registered? <Link href="/login">Sign in</Link></p></section></main>}
