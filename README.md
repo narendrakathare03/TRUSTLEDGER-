@@ -1,112 +1,270 @@
-# TrustLedger — Trust-Scored Memory Store for AI Agents
+# TrustLedger
 
-A DBMS Level 3 mini-project built with Next.js, PostgreSQL and pgvector. It records memory provenance, maintains a trust score for each fact, detects semantically similar memories and lets a human resolve possible conflicts.
+### Trust-Scored Memory Store for AI Agents
 
-## Technology
-- Frontend/API: Next.js 14 App Router, React, TypeScript
-- Relational database: PostgreSQL (uses the existing database named `postgres`)
-- Vector search: pgvector, cosine distance (`<=>`)
-- Embeddings: `Xenova/all-MiniLM-L6-v2` through Transformers.js (384 dimensions)
-- Authentication: bcrypt password hashes + signed HTTP-only JWT cookie
+TrustLedger is a web-based memory management system designed to help AI agents store, organize and manage information about users. It assigns trust scores to stored memory facts and identifies potentially conflicting information using semantic similarity.
 
-## Important database safety
-The SQL creates a dedicated `trustledger` schema inside the existing `postgres` database. It does not drop or modify objects in the `public` schema. Run the SQL scripts in order. Do not run the original report's DROP statements against a shared database.
+The system uses PostgreSQL and pgvector for database management and vector similarity search, with a Next.js-based web application for user interaction.
 
-## Prerequisites
-1. Node.js 20 LTS or newer and npm.
-2. PostgreSQL 15+ running locally.
-3. pgvector installed for the same PostgreSQL installation. The extension must be available before `CREATE EXTENSION vector` can succeed.
-4. pgAdmin 4 or `psql`.
+---
 
-### Install pgvector on Windows
-The PostgreSQL installer does not always include pgvector. Install a pgvector build compatible with your exact PostgreSQL major version and architecture, or use a PostgreSQL distribution that bundles pgvector. Then restart PostgreSQL. In pgAdmin, check **postgres → Extensions** or run `SELECT name FROM pg_available_extensions WHERE name='vector';`. If no row appears, pgvector is not installed yet; the SQL cannot enable an extension that is absent from the server.
+## Project Overview
 
-## Database setup
-1. Open pgAdmin and connect to your local PostgreSQL 18 server.
-2. Select the existing database named **postgres** and open Query Tool.
-3. Run these files in order, one at a time:
-   - `database/01_ddl.sql`
-   - `database/02_dml_seed.sql` (optional sample records; login accounts should be created through the app)
-   - `database/03_queries.sql` (demonstrates DML, joins, grouping, having, ordering, aggregates, subquery and view)
-   - `database/04_advanced_features.sql`
-   - `database/05_vector_search.sql`
-4. Confirm tables under `postgres → Schemas → trustledger → Tables`.
+AI agents may store information about users across multiple interactions. Over time, this information can become outdated, duplicated or inconsistent.
 
-The seed SQL creates demo user records with placeholder password hashes for database demonstrations only. Do not log in with these records. Create real accounts through the registration page.
+TrustLedger addresses this problem by providing a structured memory store where:
 
-## Run the web application
-1. Open a terminal in this project folder.
-2. Install packages:
-   ```bash
-   npm install
-   ```
-3. Copy `.env.example` to `.env.local`.
-4. Edit `.env.local` and set the PostgreSQL password in `DATABASE_URL`. Replace `JWT_SECRET` with a random secret of at least 32 characters. Do not commit `.env.local`.
-5. Start the app:
-   ```bash
-   npm run dev
-   ```
-6. Open http://localhost:3000 and register a user.
+- Each memory fact is associated with a user and an agent.
+- Every memory fact has an associated trust score.
+- Text embeddings are used to identify semantically similar memories.
+- Potential conflicts are stored for review.
+- Administrators can review and resolve conflicts.
 
-The embedding model downloads on first use and may take a few minutes. The first memory submission can therefore be slower than later submissions.
+## Key Features
 
-## Admin role
-New registrations are assigned the `user` role. To promote a trusted account to admin, run this in pgAdmin (replace the username):
-```sql
-UPDATE trustledger."user" SET role='admin' WHERE username='your_username';
+- **User Authentication:** User registration and login.
+- **Agent-Based Memory:** Organizes memory facts under individual agents.
+- **Memory Management:** Add and view stored memory facts.
+- **Trust Score Management:** Assigns initial trust scores based on the source of a memory.
+- **Semantic Similarity Search:** Uses pgvector and text embeddings to identify similar memories.
+- **Conflict Detection:** Identifies potentially conflicting memory facts.
+- **Conflict Management:** Displays pending conflicts for review.
+- **Administrator Approval:** Allows authorized administrators to resolve conflicts.
+- **Dashboard:** Displays memory records, trust scores and conflict statistics.
+
+## Technology Stack
+
+| Component            | Technology         |
+| -------------------- | ------------------ |
+| Frontend             | Next.js 14, React  |
+| Programming Language | TypeScript         |
+| Backend              | Next.js API Routes |
+| Database             | PostgreSQL 18      |
+| Vector Extension     | pgvector 0.8.7     |
+| Embedding Model      | all-MiniLM-L6-v2   |
+| Authentication       | JWT and bcrypt     |
+| Validation           | Zod                |
+
+## Database Design
+
+The project uses a dedicated PostgreSQL schema named `trustledger`.
+
+### Database Tables
+
+| Table         | Description                                                  |
+| ------------- | ------------------------------------------------------------ |
+| `user`        | Stores user account information and roles                    |
+| `agent`       | Stores agents associated with users                          |
+| `memory_fact` | Stores memory text, source type and embeddings               |
+| `trust_score` | Stores trust scores associated with memory facts             |
+| `conflict`    | Stores potentially conflicting memory pairs and their status |
+
+### Database Concepts Implemented
+
+- Primary Keys and Foreign Keys
+- UNIQUE, NOT NULL and CHECK constraints
+- DDL and DML operations
+- INSERT, UPDATE and DELETE statements
+- INNER JOIN
+- GROUP BY and Aggregate Functions
+- Nested Subqueries
+- Correlated Subqueries
+- Common Table Expressions (CTE)
+- Transactions and ROLLBACK
+- Database Indexes
+- Stored Procedures
+- Functions and Triggers
+- Vector Similarity Search
+
+## Trust Score Mechanism
+
+TrustLedger assigns an initial trust score according to the source of the memory.
+
+| Memory Source  | Initial Trust Score |
+| -------------- | ------------------: |
+| User-stated    |               0.800 |
+| Agent-inferred |               0.500 |
+
+A PostgreSQL trigger automatically creates the initial trust-score record whenever a new memory fact is inserted.
+
+### Conflict Resolution
+
+The project supports three conflict-resolution options:
+
+| Resolution     | New Fact Score | Old Fact Score |
+| -------------- | -------------: | -------------: |
+| Keep Old       |          0.250 |          0.900 |
+| Accept New     |          0.900 |          0.300 |
+| Both Uncertain |          0.400 |          0.400 |
+
+The stored procedure `resolve_conflict_scores()` updates the corresponding trust scores after conflict resolution.
+
+## Application Screenshots
+
+The following screenshots demonstrate the main application interfaces and workflows.
+
+### 1. Home Page
+
+
+
+### 2. Login Page
+
+
+
+### 3. Registration Page
+
+
+
+### 4. Dashboard
+
+
+
+### 5. Memory Facts
+
+
+
+### 6. Add Memory
+
+
+
+### 7. Conflict Management
+
+
+
+### 8. Pending Conflict View
+
+
+
+### 9. Administrator Conflict Approval
+
+
+
+### 10. Conflict After Approval
+
+
+
+## Project Structure
+
+```text
+trustledger/
+│
+├── database/
+│   ├── 01_ddl.sql
+│   ├── 02_dml_seed.sql
+│   ├── 03_queries.sql
+│   ├── 04_advanced_features.sql
+│   └── 05_vector_search.sql
+│
+├── docs/
+│   └── screenshots/
+│       ├── home.png
+│       ├── login.png
+│       ├── register.png
+│       ├── dashboard.png
+│       ├── memory-facts.png
+│       ├── add-memory.png
+│       ├── conflict-inbox.png
+│       ├── pending-conflict.png
+│       ├── admin-approval.png
+│       └── conflict-approved.png
+│
+├── src/
+│   ├── app/
+│   │   └── api/
+│   └── lib/
+│
+├── tests/
+├── .env.example
+├── .gitignore
+├── package.json
+├── package-lock.json
+└── README.md
 ```
-The application checks roles on API requests. Admin users can view all users' memory/conflict records; regular users see only their own agent's records.
 
-## Main features
-- Register/login/logout with bcrypt password hashing and HTTP-only session cookie.
-- Add memory facts with `user_stated` or `agent_inferred` provenance.
-- Trigger creates a trust-score row automatically (0.800 for user-stated, 0.500 for inferred).
-- 384-dimensional embeddings stored in `memory_fact.embedding`.
-- Cosine similarity search finds close facts; results are flagged as **possible conflicts**, not automatically declared contradictions.
-- Conflict inbox supports Keep old / Accept new / Both uncertain.
-- Stored procedure recalculates both trust scores after a resolution.
-- Transaction wraps fact insert, candidate search and conflict creation atomically.
-- Dashboard view, indexes, validation constraints and parameterized queries.
+## Installation and Setup
 
-## SQL concepts mapped to requirements
-| Faculty requirement | Implementation |
-|---|---|
-| CREATE / ALTER / DROP | CREATE TABLE/SCHEMA/INDEX/VIEW/FUNCTION/PROCEDURE; ALTER TABLE; DROP TRIGGER IF EXISTS in `01_ddl.sql`. A DROP TABLE demonstration is intentionally not run against the shared database; see below. |
-| PK, FK, constraints | `01_ddl.sql` |
-| INSERT / UPDATE / DELETE / SELECT | `02_dml_seed.sql`, `03_queries.sql`, application API |
-| JOIN / GROUP BY / HAVING / ORDER BY / aggregates / subquery | `03_queries.sql` |
-| Trigger | `create_initial_trust_score` |
-| Stored procedure | `resolve_conflict_scores` |
-| Transactions | API fact creation and conflict resolution; SQL demo in `04_advanced_features.sql` |
-| Views / indexing | `v_memory_dashboard`, indexes in `01_ddl.sql` |
-| Vector similarity | pgvector cosine distance in memory API and `05_vector_search.sql` |
-| Two roles | `admin` and `user` in user table and API authorization |
+### Prerequisites
 
-### DROP statement demonstration
-Because this project uses a shared `postgres` database, the setup deliberately avoids dropping project tables. To demonstrate DROP for evaluation, use a disposable test object:
-```sql
-CREATE TABLE trustledger.drop_demo (id INT);
-DROP TABLE trustledger.drop_demo;
+Install the following software:
+
+- Node.js 20 or later
+- npm
+- PostgreSQL 18
+- pgvector extension
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/narendrakathare03/TRUSTLEDGER-.git
+cd TRUSTLEDGER-/trustledger
 ```
 
-## Testing checklist
-- [ ] Register a new account and verify a bcrypt hash is stored (not the raw password).
-- [ ] Log in with correct and incorrect credentials.
-- [ ] Add a user-stated fact; verify the trigger creates a trust score of 0.800.
-- [ ] Add an agent-inferred fact; verify initial trust score 0.500.
-- [ ] Add a semantically similar contradictory candidate and verify a pending conflict appears.
-- [ ] Resolve each decision and verify the stored procedure updates scores.
-- [ ] Verify one user cannot read another user's facts by changing API requests.
-- [ ] Verify admin can see all agents' facts.
-- [ ] Run `npm run typecheck` and `npm run build`.
+### 2. Configure the Database
 
-## Notes / limitations
-- Embedding similarity finds semantically close facts; it cannot reliably prove logical contradiction. The interface intentionally calls them possible conflicts and requires a human decision.
-- pgvector's `ivfflat` index is created for the required vector indexing demonstration. For very small datasets PostgreSQL may prefer a sequential scan; this is normal.
-- `database/02_dml_seed.sql` sample accounts use placeholder hashes and are not usable for app login. Register through the app instead.
-- The app expects the SQL schema to have been installed before it starts. It does not automatically run DDL migrations.
+Create or select your PostgreSQL database.
 
-## Suggested team contribution record
-- Member 1: initial problem definition, ER diagram, relational schema and initial DDL (as documented in the submitted design report).
-- Member 2: application/API implementation, DML and analytical queries, vector embedding workflow, integration and application testing.
-- Both members should review and commit changes they actually made. Adjust this section to match real contributions; do not claim work that was not performed.
+Make sure the pgvector extension is installed and available.
+
+Execute the SQL files from the `database` folder in the following order:
+
+```text
+01_ddl.sql
+02_dml_seed.sql
+03_queries.sql
+04_advanced_features.sql
+05_vector_search.sql
+```
+
+### 3. Configure Environment Variables
+
+Create a local environment file using the example file:
+
+```bash
+copy .env.example .env.local
+```
+
+Configure the required environment variables in `.env.local`:
+
+```env
+DATABASE_URL=your_postgresql_connection_string
+JWT_SECRET=your_secure_secret
+```
+
+Use your own database credentials and a secure JWT secret. Do not upload `.env.local` to GitHub.
+
+### 4. Install Dependencies
+
+```bash
+npm install
+```
+
+### 5. Run the Application
+
+```bash
+npm run dev
+```
+
+Open the application in your browser:
+
+```text
+http://localhost:3000
+```
+
+### 6. Type Checking
+
+```bash
+npm run typecheck
+```
+
+## API Routes
+
+The application uses Next.js API routes to communicate with the PostgreSQL database.
+
+| HTTP Method | API Endpoint             | Purpose                               |
+| ----------- | ------------------------ | ------------------------------------- |
+| GET         | `/api/memories`          | Retrieve memory facts                 |
+| POST        | `/api/memories`          | Add a new memory fact                 |
+| GET         | `/api/conflicts`         | Retrieve conflict records             |
+| POST        | `/api/conflicts/resolve` | Submit a conflict-resolution decision |
+
+##
