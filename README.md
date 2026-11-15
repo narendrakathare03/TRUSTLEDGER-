@@ -34,16 +34,16 @@ TrustLedger addresses this problem by providing a structured memory store where:
 
 ## Technology Stack
 
-| Component            | Technology         |
-| -------------------- | ------------------ |
-| Frontend             | Next.js 14, React  |
-| Programming Language | TypeScript         |
-| Backend              | Next.js API Routes |
-| Database             | PostgreSQL 18      |
-| Vector Extension     | pgvector 0.8.7     |
-| Embedding Model      | all-MiniLM-L6-v2   |
-| Authentication       | JWT and bcrypt     |
-| Validation           | Zod                |
+| Component | Technology |
+|---|---|
+| Frontend | Next.js 14, React |
+| Programming Language | TypeScript |
+| Backend | Next.js API Routes |
+| Database | PostgreSQL 18 |
+| Vector Extension | pgvector 0.8.7 |
+| Embedding Model | all-MiniLM-L6-v2 |
+| Authentication | JWT and bcrypt |
+| Validation | Zod |
 
 ## Database Design
 
@@ -51,13 +51,13 @@ The project uses a dedicated PostgreSQL schema named `trustledger`.
 
 ### Database Tables
 
-| Table         | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| `user`        | Stores user account information and roles                    |
-| `agent`       | Stores agents associated with users                          |
-| `memory_fact` | Stores memory text, source type and embeddings               |
-| `trust_score` | Stores trust scores associated with memory facts             |
-| `conflict`    | Stores potentially conflicting memory pairs and their status |
+| Table | Description |
+|---|---|
+| `user` | Stores user account information and roles |
+| `agent` | Stores agents associated with users |
+| `memory_fact` | Stores memory text, source type and embeddings |
+| `trust_score` | Stores trust scores associated with memory facts |
+| `conflict` | Stores potentially conflicting memory pairs and their status |
 
 ### Database Concepts Implemented
 
@@ -80,10 +80,10 @@ The project uses a dedicated PostgreSQL schema named `trustledger`.
 
 TrustLedger assigns an initial trust score according to the source of the memory.
 
-| Memory Source  | Initial Trust Score |
-| -------------- | ------------------: |
-| User-stated    |               0.800 |
-| Agent-inferred |               0.500 |
+| Memory Source | Initial Trust Score |
+|---|---:|
+| User-stated | 0.800 |
+| Agent-inferred | 0.500 |
 
 A PostgreSQL trigger automatically creates the initial trust-score record whenever a new memory fact is inserted.
 
@@ -91,13 +91,15 @@ A PostgreSQL trigger automatically creates the initial trust-score record whenev
 
 The project supports three conflict-resolution options:
 
-| Resolution     | New Fact Score | Old Fact Score |
-| -------------- | -------------: | -------------: |
-| Keep Old       |          0.250 |          0.900 |
-| Accept New     |          0.900 |          0.300 |
-| Both Uncertain |          0.400 |          0.400 |
+| Resolution | New Fact Score | Old Fact Score |
+|---|---:|---:|
+| Keep Old | 0.250 | 0.900 |
+| Accept New | 0.900 | 0.300 |
+| Both Uncertain | 0.400 | 0.400 |
 
 The stored procedure `resolve_conflict_scores()` updates the corresponding trust scores after conflict resolution.
+
+---
 
 ## Application Screenshots
 
@@ -105,43 +107,45 @@ The following screenshots demonstrate the main application interfaces and workfl
 
 ### 1. Home Page
 
-
+![TrustLedger Home Page](docs/home.png)
 
 ### 2. Login Page
 
-
+![User Login](docs/login.png)
 
 ### 3. Registration Page
 
-
+![User Registration](docs/register.png)
 
 ### 4. Dashboard
 
-
+![TrustLedger Dashboard](docs/dashboard.png)
 
 ### 5. Memory Facts
 
-
+![Memory Facts Display](docs/memory-facts.png)
 
 ### 6. Add Memory
 
-
+![Add Memory Page](docs/addmemory.png)
 
 ### 7. Conflict Management
 
-
+![Conflict Management Page](docs/conflict-inbox.png)
 
 ### 8. Pending Conflict View
 
-
+![Pending Conflict View](docs/pending-conflict.png)
 
 ### 9. Administrator Conflict Approval
 
-
+![Administrator Conflict Approval](docs/admin-approval.png)
 
 ### 10. Conflict After Approval
 
+![Conflict Status After Approval](docs/conflict-approved.png)
 
+---
 
 ## Project Structure
 
@@ -156,21 +160,19 @@ trustledger/
 │   └── 05_vector_search.sql
 │
 ├── docs/
-│   └── screenshots/
-│       ├── home.png
-│       ├── login.png
-│       ├── register.png
-│       ├── dashboard.png
-│       ├── memory-facts.png
-│       ├── add-memory.png
-│       ├── conflict-inbox.png
-│       ├── pending-conflict.png
-│       ├── admin-approval.png
-│       └── conflict-approved.png
+│   ├── home.png
+│   ├── login.png
+│   ├── register.png
+│   ├── dashboard.png
+│   ├── memory-facts.png
+│   ├── addmemory.png
+│   ├── conflict-inbox.png
+│   ├── pending-conflict.png
+│   ├── admin-approval.png
+│   └── conflict-approved.png
 │
 ├── src/
 │   ├── app/
-│   │   └── api/
 │   └── lib/
 │
 ├── tests/
@@ -260,11 +262,13 @@ npm run typecheck
 
 The application uses Next.js API routes to communicate with the PostgreSQL database.
 
-| HTTP Method | API Endpoint             | Purpose                               |
-| ----------- | ------------------------ | ------------------------------------- |
-| GET         | `/api/memories`          | Retrieve memory facts                 |
-| POST        | `/api/memories`          | Add a new memory fact                 |
-| GET         | `/api/conflicts`         | Retrieve conflict records             |
-| POST        | `/api/conflicts/resolve` | Submit a conflict-resolution decision |
+| HTTP Method | API Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/memories` | Retrieve memory facts |
+| POST | `/api/memories` | Add a new memory fact |
+| GET | `/api/conflicts` | Retrieve conflict records |
+| POST | `/api/conflicts/resolve` | Submit a conflict-resolution decision |
 
-##
+---
+
+**TrustLedger — Remember what matters. Know what to trust.**
